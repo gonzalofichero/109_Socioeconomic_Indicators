@@ -50,4 +50,29 @@ gini.wtd(ineq$Income, weights = ineq$Sample_Weight)
 theil.wtd(ineq$Income, weights = ineq$Sample_Weight)
   
 
+# 2. What is the level of inequality for the different household types? 
+# Use the different inequality measures presented in the course. 
+# Are the different household types ranked consistently when using the different inequality indices?
+
+gini_by_house <- gini_decomp(ineq$Income, ineq$house_cat, weights = ineq$Sample_Weight)
+
+theil_by_house 
+
+
+  
+  
+# 4. Let’s define the poverty threshold as 60% of the median (the standard definition used in the EU). 
+# What is the level of poverty in that society according to FGT0, FGT1, and FGT2?
+
+# Unweighted
+poverty_z <- median(ineq$Income) * 0.6
+
+# Weighted
+ineq$poverty_z2 <- median(rep(ineq$Income, times=ineq$Sample_Weight)) * 0.6
+
+# Calculating who is poor given Z, and calculating the poverty gap
+ineq <- ineq %>% 
+          mutate(is_poor = as.factor(case_when(Income < poverty_z2 ~ 1,
+                                               TRUE ~ 0)),
+                 poverty_gap = if_else(poverty_z2 - Income < 0, 0, poverty_z2 - Income))
 
