@@ -148,7 +148,7 @@ gender_v2 %>%
 
 
 # Oceania is always bi-modal distribution...
-# For the other could find mean + std and assign random number in 2+- std interva?
+# For the other could find mean + std and assign random number in 1+- std interva?
 
 
 # Calculating mean and std of each continent
@@ -163,23 +163,50 @@ gender_v2 %>%
             sd_gap_MYS = sd(gap_MYS, na.rm = T),
             sd_gap_LE = sd(gap_LE, na.rm = T)) -> to_imput
 
-# Imputing random value between -+2 SD from mean, by continent for each missing value
+# Imputing random value between -+1 SD from mean, by continent for each missing value
 # and setting seed for random assignment
+# Standardizing MAX-MIN each gap feature
 gender_imput <- gender_v2 %>% left_join(to_imput, by = "region")
 
+set.seed(42)
+
+# Own function for max-min normalization
+normalize <- function(x)
+{
+  return((x- min(x)) /(max(x)-min(x)))
+}
+
+
 gender_imput %>% 
-  mutate(gap_LE = if_else(is.na(gap_LE), mean_gap_LE + sd_gap_LE * runif(1, min = -1, max = 1), gap_LE),
+  mutate(
+         # For each feature, I'm assigning a number +-1 standard deviation from the mean, group by region
+         gap_LE = if_else(is.na(gap_LE), mean_gap_LE + sd_gap_LE * runif(1, min = -1, max = 1), gap_LE),
          gap_MYS = if_else(is.na(gap_MYS), mean_gap_MYS + sd_gap_MYS * runif(1, min = -1, max = 1), gap_MYS),
          gap_EYS = if_else(is.na(gap_EYS), mean_gap_EYS + sd_gap_EYS * runif(1, min = -1, max = 1), gap_EYS),
-         gap_GNI = if_else(is.na(gap_GNI), mean_gap_GNI + sd_gap_GNI * runif(1, min = -1, max = 1), gap_GNI)
+         gap_GNI = if_else(is.na(gap_GNI), mean_gap_GNI + sd_gap_GNI * runif(1, min = -1, max = 1), gap_GNI),
+         # Normalizing with max-min normalization (own function, run)
+         # All feature will be in [0,1] range
+         std_gap_LE = normalize(gap_LE),
+         std_gap_MYS = normalize(gap_MYS),
+         std_gap_EYS = normalize(gap_EYS),
+         std_gap_GNI = normalize(gap_GNI),
+         # Adding weights for each feature
+         # MYS and EYS are same dimension, hence 1/6 each, LE and GNI 1/3 => Index will still be in [0,1] range
+         gender_index = (1/3) * std_gap_LE + (1/6) * std_gap_MYS + (1/6) * std_gap_EYS + (1/3) * std_gap_GNI
   ) -> gender_imput
+
+# Creating small data frame for plotting
+gender_imput %>% 
+  select(Country, iso3, country_code, 
+         std_gap_LE, std_gap_MYS, std_gap_EYS, std_gap_GNI,
+         gender_index) -> gender_small
 
 
 # Generate sf data for plotting
-joinCountryData2Map(gender, joinCode="ISO3", nameJoinColumn="iso3") -> gender_mapped
+joinCountryData2Map(gender_small, joinCode="ISO3", nameJoinColumn="iso3") -> gender_mapped
 
 # Plotting
-mapCountryData(gender_mapped, nameColumnToPlot='gap_GNI')
+mapCountryData(gender_mapped, nameColumnToPlot='gender_index')
 
 
 
