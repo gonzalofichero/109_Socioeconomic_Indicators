@@ -129,6 +129,9 @@ gender %>%
   rename(iso2 = cty_code) %>% 
   left_join(un_areas, by = "iso2") -> gender_v2
 
+# Countries by #Missing and Region
+table(gender_v2$region, gender_v2$qty_missing)
+
 
 # Calculating distribution for gaps by subregion
 gender_v2 %>% 
@@ -165,7 +168,11 @@ gender_v2 %>%
 gender_imput <- gender_v2 %>% left_join(to_imput, by = "region")
 
 gender_imput %>% 
-  mutate(
+  mutate(gap_LE = if_else(is.na(gap_LE), mean_gap_LE + sd_gap_LE * runif(1, min = -1, max = 1), gap_LE),
+         gap_MYS = if_else(is.na(gap_MYS), mean_gap_MYS + sd_gap_MYS * runif(1, min = -1, max = 1), gap_MYS),
+         gap_EYS = if_else(is.na(gap_EYS), mean_gap_EYS + sd_gap_EYS * runif(1, min = -1, max = 1), gap_EYS),
+         gap_GNI = if_else(is.na(gap_GNI), mean_gap_GNI + sd_gap_GNI * runif(1, min = -1, max = 1), gap_GNI)
+  ) -> gender_imput
 
 
 # Generate sf data for plotting
