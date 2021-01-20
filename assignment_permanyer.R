@@ -214,11 +214,11 @@ library(classInt)
 library(RColorBrewer)
 
 # getting class intervals
-classInt <- classIntervals(gender_mapped[["gender_index"]], n=5, style = "jenks")
+classInt <- classIntervals(gender_mapped[["gender_index"]], n=6, style = "jenks")
 catMethod = classInt[["brks"]]
 
 # getting colours: reverse pallete so purple (feminism) is better
-colourPalette <- rev(brewer.pal(5,'RdPu'))
+colourPalette <- rev(brewer.pal(6,'RdPu'))
 
 # plot map
 mapDevice() #create world map shaped window
