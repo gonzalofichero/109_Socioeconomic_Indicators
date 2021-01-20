@@ -220,13 +220,16 @@ catMethod = classInt[["brks"]]
 # getting colours: reverse pallete so purple (feminism) is better
 colourPalette <- rev(brewer.pal(6,'RdPu'))
 
+# https://www.r-bloggers.com/2016/07/creating-color-palettes-in-r/
+mycols <- colors()[c(465, 542, 419, 520, 616, 29)]
+
 # plot map
 mapDevice() #create world map shaped window
 mapParams <- mapCountryData(gender_mapped
                             ,nameColumnToPlot="gender_index"
                             ,addLegend=FALSE
                             ,catMethod = catMethod
-                            ,colourPalette=colourPalette)
+                            ,colourPalette=mycols)
 
 #adding legend
 do.call(addMapLegend, c(mapParams, legendLabels="all", legendWidth=0.5, legendIntervals="data", legendMar = 2))
