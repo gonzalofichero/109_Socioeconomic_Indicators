@@ -205,9 +205,30 @@ gender_imput %>%
 # Generate sf data for plotting
 joinCountryData2Map(gender_small, joinCode="ISO3", nameJoinColumn="iso3") -> gender_mapped
 
+# First map: DEPRECATED
+# mapCountryData(gender_mapped, nameColumnToPlot='gender_index')
+
+
 # Plotting
-mapCountryData(gender_mapped, nameColumnToPlot='gender_index')
+library(classInt)
+library(RColorBrewer)
 
+# getting class intervals
+classInt <- classIntervals(gender_mapped[["gender_index"]], n=5, style = "jenks")
+catMethod = classInt[["brks"]]
 
+# getting colours: reverse pallete so purple (feminism) is better
+colourPalette <- rev(brewer.pal(5,'RdPu'))
+
+# plot map
+mapDevice() #create world map shaped window
+mapParams <- mapCountryData(gender_mapped
+                            ,nameColumnToPlot="gender_index"
+                            ,addLegend=FALSE
+                            ,catMethod = catMethod
+                            ,colourPalette=colourPalette)
+
+#adding legend
+do.call(addMapLegend, c(mapParams, legendLabels="all", legendWidth=0.5, legendIntervals="data", legendMar = 2))
 
 
