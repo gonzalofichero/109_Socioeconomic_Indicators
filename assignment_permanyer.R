@@ -61,13 +61,10 @@ gini_by_house <- gini_decomp(ineq$Income, ineq$house_cat, weights = ineq$Sample_
 
 
 # Calculating theil for each subset
-
-for (i in 1:1){
-  ineq %>% 
-    filter(Hhtype == i) %>% 
-    mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight))
-    theil_group <- data.frame(theil_group)
-}
+ineq %>% 
+  group_by(house_cat) %>% 
+  summarize(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) %>% 
+  ungroup() -> theil_group
 
 # DEPRECATED CODE! Now the looping is working
 # 
@@ -348,5 +345,10 @@ mapParams <- mapCountryData(gender_mapped
 
 #adding legend
 do.call(addMapLegend, c(mapParams, legendLabels="all", legendWidth=0.5, legendIntervals="data", legendMar = 2))
+
+
+
+
+
 
 
