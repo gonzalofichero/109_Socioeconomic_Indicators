@@ -59,8 +59,6 @@ theil.wtd(ineq$Income, weights = ineq$Sample_Weight)
 
 gini_by_house <- gini_decomp(ineq$Income, ineq$house_cat, weights = ineq$Sample_Weight)
 
-data.frame(gini_by_house$gini_group$gini_group)
-
 
 # Calculating theil for each subset
 ineq %>% 
@@ -90,6 +88,19 @@ theil_group <- rbind(theil_1,theil_2,theil_3,theil_4,theil_5,theil_6,theil_11) %
                 group_by(house_cat) %>% 
                 summarize(theil_group = max(theil_group))
 
+# Calculating variability coefficient by group
+library(Hmisc)
+
+ineq %>% 
+  group_by(house_cat) %>% 
+  mutate( group_mean = weighted.mean(Income, Sample_Weight),
+          group_sd = sqrt(wtd.var(Income, Sample_Weight)),
+          group_cv = group_sd/group_mean) %>% 
+  slice(which.max(group_cv)) %>% 
+  select(house_cat, group_cv) -> cv_by_group
+  
+
+
 # Binding both index into data.frame
 ineq_group <- as.data.frame(cbind(theil_group, gini_by_house$gini_group$gini_group))
 row.names(ineq_group) <- c()
@@ -97,6 +108,9 @@ names(ineq_group) <- c("house_cat", "theil_group", "gini_group")
 
 # Arranging by Index and calcularint Rank for each
 ineq_group %>% 
+  left_join(cv_by_group, by = "house_cat") %>%
+  arrange(group_cv) %>% 
+  mutate(cv_rank = row_number()) %>%
   arrange(theil_group) %>% 
   mutate(theil_rank = row_number()) %>% 
   arrange(gini_group) %>% 
