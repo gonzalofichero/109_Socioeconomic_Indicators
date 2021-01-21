@@ -61,32 +61,43 @@ gini_by_house <- gini_decomp(ineq$Income, ineq$house_cat, weights = ineq$Sample_
 
 
 # Calculating theil for each subset
-ineq %>% 
-  filter(Hhtype == 1) %>% 
-  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_1
-ineq %>% 
-  filter(Hhtype == 2) %>% 
-  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_2
-ineq %>% 
-  filter(Hhtype == 3) %>% 
-  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_3
-ineq %>% 
-  filter(Hhtype == 4) %>% 
-  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_4
-ineq %>% 
-  filter(Hhtype == 5) %>% 
-  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_5
-ineq %>% 
-  filter(Hhtype == 6) %>% 
-  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_6
-ineq %>% 
-  filter(Hhtype == 11) %>% 
-  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_11
 
-# Binding all together
-theil_group <- rbind(theil_1,theil_2,theil_3,theil_4,theil_5,theil_6,theil_11) %>% 
-                group_by(house_cat) %>% 
-                summarize(theil_group = max(theil_group))
+for (i in 1:1){
+  ineq %>% 
+    filter(Hhtype == i) %>% 
+    mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight))
+    theil_group <- data.frame(theil_group)
+}
+
+# DEPRECATED CODE! Now the looping is working
+# 
+# ineq %>% 
+#   filter(Hhtype == 1) %>% 
+#   mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_1
+# ineq %>% 
+#   filter(Hhtype == 2) %>% 
+#   mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_2
+# ineq %>% 
+#   filter(Hhtype == 3) %>% 
+#   mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_3
+# ineq %>% 
+#   filter(Hhtype == 4) %>% 
+#   mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_4
+# ineq %>% 
+#   filter(Hhtype == 5) %>% 
+#   mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_5
+# ineq %>%
+#   filter(Hhtype == 6) %>%
+#   mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_6
+# ineq %>% 
+#   filter(Hhtype == 11) %>% 
+#   mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_11
+# 
+# # Binding all together
+# theil_group <- rbind(theil_1,theil_2,theil_3,theil_4,theil_5,theil_6,theil_11) %>% 
+#                 group_by(house_cat) %>% 
+#                 summarize(theil_group = max(theil_group))
+
 
 # Calculating variability coefficient by group
 library(Hmisc)
