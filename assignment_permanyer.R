@@ -146,11 +146,38 @@ ineq$poverty_z2 <- median(rep(ineq$Income, times=ineq$Sample_Weight)) * 0.6
 
 # Calculating who is poor given Z, and calculating the poverty gap
 ineq <- ineq %>% 
-          mutate(is_poor = as.factor(case_when(Income < poverty_z2 ~ 1,
-                                               TRUE ~ 0)),
+          mutate(is_poor = case_when(Income < poverty_z2 ~ 1,
+                                               TRUE ~ 0),
                  poverty_gap = if_else(poverty_z2 - Income < 0, 0, poverty_z2 - Income))
 
+ineq %>% 
+  mutate(total_w = sum(Sample_Weight),
+         fgt_0i = is_poor*(Sample_Weight/total_w),
+         fgt_1i = poverty_gap * (Sample_Weight/total_w),
+         fgt_2i = (poverty_gap * poverty_gap) * (Sample_Weight/total_w)) %>%
+  summarize(fgt_0 = sum(fgt_0i),
+            fgt_1 = sum(fgt_1i),
+            fgt_2 = sum(fgt_2i))
+  
 
+# 5. What is the level of poverty (according to FGT0, FGT1, and FGT2) 
+# for the different household types? 
+# Are the different household types ranked consistently when using the different poverty indices?
+
+ineq %>% 
+  group_by(house_cat) %>% 
+  summarize(group_w = sum(Sample_Weight),
+             fgt_0i = sum(is_poor*(Sample_Weight/group_w)),
+             fgt_1i = sum(poverty_gap * (Sample_Weight/group_w)),
+             fgt_2i = sum((poverty_gap * poverty_gap) * (Sample_Weight/group_w))) %>% 
+  arrange(fgt_0i) %>% 
+  mutate(fgt_0_rank = row_number()) %>% 
+  arrange(fgt_1i) %>% 
+  mutate(fgt_1_rank = row_number()) %>% 
+  arrange(fgt_2i) %>% 
+  mutate(fgt_2_rank = row_number()) -> poverty_group
+
+# Create table by rankingsof poverty
 
 
 ####################
