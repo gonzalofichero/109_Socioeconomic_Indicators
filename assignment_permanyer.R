@@ -59,18 +59,81 @@ theil.wtd(ineq$Income, weights = ineq$Sample_Weight)
 
 gini_by_house <- gini_decomp(ineq$Income, ineq$house_cat, weights = ineq$Sample_Weight)
 
-for 
+data.frame(gini_by_house$gini_group$gini_group)
 
-ineq %>%
+
+# Calculating theil for each subset
+ineq %>% 
+  filter(Hhtype == 1) %>% 
+  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_1
+ineq %>% 
   filter(Hhtype == 2) %>% 
-  mutate(veo = dineq::theil.wtd(Income, weights = Sample_Weight),
-         )
+  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_2
+ineq %>% 
+  filter(Hhtype == 3) %>% 
+  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_3
+ineq %>% 
+  filter(Hhtype == 4) %>% 
+  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_4
+ineq %>% 
+  filter(Hhtype == 5) %>% 
+  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_5
+ineq %>% 
+  filter(Hhtype == 6) %>% 
+  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_6
+ineq %>% 
+  filter(Hhtype == 11) %>% 
+  mutate(theil_group = dineq::theil.wtd(Income, weights = Sample_Weight)) -> theil_11
+
+# Binding all together
+theil_group <- rbind(theil_1,theil_2,theil_3,theil_4,theil_5,theil_6,theil_11) %>% 
+                group_by(house_cat) %>% 
+                summarize(theil_group = max(theil_group))
+
+# Binding both index into data.frame
+ineq_group <- as.data.frame(cbind(theil_group, gini_by_house$gini_group$gini_group))
+row.names(ineq_group) <- c()
+names(ineq_group) <- c("house_cat", "theil_group", "gini_group")
+
+# Arranging by Index and calcularint Rank for each
+ineq_group %>% 
+  arrange(theil_group) %>% 
+  mutate(theil_rank = row_number()) %>% 
+  arrange(gini_group) %>% 
+  mutate(gini_rank = row_number()) -> ineq_group
 
 
-theil_by_house 
+# Create table by rankings
 
 
-  
+
+
+# 3. Decompose total inequality in inequality within groups + inequality between groups 
+# (use the (decomposable) inequality measure you prefer). 
+# What is the contribution of each component to overall inequality?
+
+# 1) Calculating weight and mean for whole sample
+# 2) Calculating weight and mean for each House type group
+# 3) Adding the theil index already calculated in point 2
+# 4) Creating the within and between for each group
+# 5) Summup the total for the whole sample: between + within
+ineq %>% 
+  mutate(total_w = sum(Sample_Weight),
+         total_mu = weighted.mean(Income, Sample_Weight)) %>%
+  group_by(house_cat) %>%
+  summarise(g_w = sum(Sample_Weight),
+            g_mu = weighted.mean(Income, Sample_Weight),
+            total_w = max(total_w),
+            total_mu = max(total_mu)) %>% 
+  left_join(theil_group, by = "house_cat") %>% 
+  mutate(theil_within = (g_w / total_w) * (g_mu / total_mu) * theil_group,
+         theil_between = (g_w / total_w) * (g_mu / total_mu) * log(g_mu / total_mu)) -> theil_decomp
+
+theil_decomp %>% 
+  summarize(theil_w = sum(theil_within),
+            theil_b = sum(theil_between))
+
+
   
 # 4. Let’s define the poverty threshold as 60% of the median (the standard definition used in the EU). 
 # What is the level of poverty in that society according to FGT0, FGT1, and FGT2?
