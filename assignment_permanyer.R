@@ -57,7 +57,11 @@ theil.wtd(ineq$Income, weights = ineq$Sample_Weight)
 # Use the different inequality measures presented in the course. 
 # Are the different household types ranked consistently when using the different inequality indices?
 
-gini_by_house <- gini_decomp(ineq$Income, ineq$house_cat, weights = ineq$Sample_Weight)
+# Calculating theil for each subset
+ineq %>% 
+  group_by(house_cat) %>% 
+  summarize(gini_group = dineq::gini.wtd(Income, weights = Sample_Weight)) %>% 
+  ungroup() -> gini_group
 
 
 # Calculating theil for each subset
@@ -110,12 +114,10 @@ ineq %>%
 
 
 # Binding both index into data.frame
-ineq_group <- as.data.frame(cbind(theil_group, gini_by_house$gini_group$gini_group))
-row.names(ineq_group) <- c()
-names(ineq_group) <- c("house_cat", "theil_group", "gini_group")
 
 # Arranging by Index and calcularint Rank for each
-ineq_group %>% 
+gini_group %>% 
+  left_join(theil_group, by = "house_cat") %>% 
   left_join(cv_by_group, by = "house_cat") %>%
   arrange(group_cv) %>% 
   mutate(cv_rank = row_number()) %>%
@@ -348,6 +350,24 @@ do.call(addMapLegend, c(mapParams, legendLabels="all", legendWidth=0.5, legendIn
 
 
 
+
+#####################################
+# EXERCISE 3
+
+# Assume we are working with a variable bounded between 0 and 100 (e.g. a percentage).
+# Assume also that the mean of the distribution is mu.
+
+
+# Q1. Among all possible distributions with mean value equal to 𝜇, which one done does maximize inequality?
+
+
+
+
+# Q2. What is the value of the Gini index or the Variance (choose the one you prefer) when applied
+# to the previous inequality-maximizing distribution?
+
+
+# Q3. Plot the values of maximal inequality found in Q2 against all values of 𝜇 ranging between 0 and 100.
 
 
 
