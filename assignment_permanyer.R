@@ -177,7 +177,7 @@ ineq$poverty_z2 <- median(rep(ineq$Income, times=ineq$Sample_Weight)) * 0.6
 ineq <- ineq %>% 
           mutate(is_poor = case_when(Income < poverty_z2 ~ 1,
                                                TRUE ~ 0),
-                 poverty_gap = if_else(poverty_z2 - Income < 0, 0, poverty_z2 - Income))
+                 poverty_gap = if_else(poverty_z2 - Income < 0, 0, ((poverty_z2 - Income)/poverty_z2)))
 
 ineq %>% 
   mutate(total_w = sum(Sample_Weight),
