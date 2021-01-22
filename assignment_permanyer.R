@@ -51,7 +51,12 @@ ineq %>%
 gini.wtd(ineq$Income, weights = ineq$Sample_Weight)
   
 theil.wtd(ineq$Income, weights = ineq$Sample_Weight)
-  
+
+ineq %>% 
+  mutate(group_mean = weighted.mean(Income, Sample_Weight),
+          group_sd = sqrt(wtd.var(Income, Sample_Weight)),
+         group_cv = group_sd/group_mean)
+
 
 # 2. What is the level of inequality for the different household types? 
 # Use the different inequality measures presented in the course. 
@@ -362,13 +367,20 @@ do.call(addMapLegend, c(mapParams, legendLabels="all", legendWidth=0.5, legendIn
 
 
 
-
 # Q2. What is the value of the Gini index or the Variance (choose the one you prefer) when applied
 # to the previous inequality-maximizing distribution?
 
 
 # Q3. Plot the values of maximal inequality found in Q2 against all values of 𝜇 ranging between 0 and 100.
 
+alfa <- seq(0,5,by = 0.1)
+beta <- seq(0,5,by = 0.1)
+x <- seq(0,1, by=0.01)
+
+for (i in x){
+  m[i] <- mean(dbeta(i, alfa, beta))
+  v[i] <- var(dbeta(i, alfa, beta))
+}
 
 
-
+dbeta(x, shape1=1, shape2=1)
