@@ -159,7 +159,7 @@ ineq %>%
          theil_between = (g_w / total_w) * (g_mu / total_mu) * log(g_mu / total_mu)) -> theil_decomp
 
 theil_decomp %>% 
-  summarize(theil_w = sum(theil_within),
+  summarise(theil_w = sum(theil_within),
             theil_b = sum(theil_between))
 
 
@@ -183,8 +183,10 @@ ineq %>%
   mutate(total_w = sum(Sample_Weight),
          fgt_0i = is_poor*(Sample_Weight/total_w),
          fgt_1i = poverty_gap * (Sample_Weight/total_w),
-         fgt_2i = (poverty_gap * poverty_gap) * (Sample_Weight/total_w)) %>%
-  summarize(fgt_0 = sum(fgt_0i),
+         fgt_2i = (poverty_gap * poverty_gap) * (Sample_Weight/total_w)) -> ineq
+
+ineq %>%
+  summarise(fgt_0 = sum(fgt_0i),
             fgt_1 = sum(fgt_1i),
             fgt_2 = sum(fgt_2i))
   
