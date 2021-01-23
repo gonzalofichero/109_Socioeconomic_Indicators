@@ -5,6 +5,7 @@ library(dineq)
 library(sf)
 library(rworldmap)
 library(naniar)
+library(Hmisc)
 
 
 ####################
@@ -55,7 +56,8 @@ theil.wtd(ineq$Income, weights = ineq$Sample_Weight)
 ineq %>% 
   mutate(group_mean = weighted.mean(Income, Sample_Weight),
           group_sd = sqrt(wtd.var(Income, Sample_Weight)),
-         group_cv = group_sd/group_mean)
+         group_cv = group_sd/group_mean) %>% 
+  summarise(cv_sample = max(group_cv))
 
 
 # 2. What is the level of inequality for the different household types? 
@@ -197,7 +199,7 @@ ineq %>%
 
 ineq %>% 
   group_by(house_cat) %>% 
-  summarize(group_w = sum(Sample_Weight),
+  summarise(group_w = sum(Sample_Weight),
              fgt_0i = sum(is_poor*(Sample_Weight/group_w)),
              fgt_1i = sum(poverty_gap * (Sample_Weight/group_w)),
              fgt_2i = sum((poverty_gap * poverty_gap) * (Sample_Weight/group_w))) %>% 
@@ -208,7 +210,8 @@ ineq %>%
   arrange(fgt_2i) %>% 
   mutate(fgt_2_rank = row_number()) -> poverty_group
 
-# Create table by rankingsof poverty
+
+# Create table by rankings of poverty
 
 
 ####################
